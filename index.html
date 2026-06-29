@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Papan Congklak Digital FPB & KPK</title>
+  <style>
+    :root{
+      --bg:#f7efe4;
+      --wood:#9b5f31;
+      --wood-dark:#6f3f1f;
+      --wood-light:#c98b54;
+      --pit:#4b2a16;
+      --pit-soft:#7b4727;
+      --seed:#fff8df;
+      --ink:#2b1b10;
+      --muted:#735943;
+      --card:#fffaf2;
+      --line:#e0c7a7;
+      --accent:#0f766e;
+      --danger:#b91c1c;
+      --ok:#15803d;
+      --blue:#1d4ed8;
+      --shadow:0 18px 40px rgba(75, 42, 22, .18);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.9), transparent 34%),
+        linear-gradient(135deg, #f7efe4 0%, #ead6bd 100%);
+      color:var(--ink);
+      min-height:100vh;
+    }
+
+    header{
+      padding:28px 18px 12px;
+      text-align:center;
+    }
+
+    header h1{
+      margin:0;
+      font-size:clamp(1.7rem, 3vw, 3rem);
+      letter-spacing:-.03em;
+      color:#3a2414;
+    }
+
+    header p{
+      margin:8px auto 0;
+      max-width:900px;
+      line-height:1.55;
+      color:var(--muted);
+      font-size:1rem;
+    }
+
+    .app{
+      width:min(1180px, calc(100% - 24px));
+      margin:16px auto 32px;
+      display:grid;
+      grid-template-columns: 350px 1fr;
+      gap:18px;
+    }
+
+    .panel, .board-card, .explain-card{
+      background:rgba(255,250,242,.94);
+      border:1px solid rgba(128,85,44,.18);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .panel{
+      padding:18px;
+      position:sticky;
+      top:12px;
+      align-self:start;
+    }
+
+    .panel h2, .explain-card h2{
+      margin:0 0 12px;
+      font-size:1.1rem;
+    }
+
+    label{
+      display:block;
+      font-weight:800;
+      margin:14px 0 7px;
+      color:#3a2414;
+    }
+
+    input, select{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fffdf9;
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:1rem;
+      color:var(--ink);
+      outline:none;
+    }
+
+    input:focus, select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(15,118,110,.13);
+    }
+
+    .hint{
+      font-size:.87rem;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.4;
+    }
+
+    .btns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    button{
+      border:0;
+      border-radius:14px;
+      padding:12px 13px;
+      font-weight:900;
+      cursor:pointer;
+      color:white;
+      background:var(--wood-dark);
+      transition:.18s transform, .18s opacity, .18s filter;
+      font-size:.95rem;
+    }
+
+    button:hover{transform:translateY(-1px); filter:brightness(1.06)}
+    button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+
+    .primary{background:var(--accent)}
+    .ghost{background:#80552c}
+    .danger{background:var(--danger)}
+    .ok{background:var(--ok)}
+    .wide{grid-column:1 / -1}
+
+    .quick{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .quick button{
+      padding:9px 8px;
+      border-radius:12px;
+      font-size:.82rem;
+      background:#b7793f;
+    }
+
+    .status{
+      margin-top:14px;
+      padding:13px;
+      border-radius:16px;
+      background:#f3e3cd;
+      border:1px solid #e4c399;
+      color:#442918;
+      line-height:1.45;
+      min-height:82px;
+    }
+
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .board-card{
+      padding:16px;
+      overflow-x:auto;
+      overflow-y:hidden;
+    }
+
+    .board-wrap{
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.10), transparent 18%, rgba(255,255,255,.14) 50%, transparent 82%),
+        linear-gradient(135deg, #d49a63 0%, var(--wood-light) 18%, var(--wood) 48%, var(--wood-dark) 100%);
+      border-radius:110px;
+      padding:26px 28px;
+      border:6px solid #603616;
+      box-shadow:
+        inset 0 6px 16px rgba(255,255,255,.18),
+        inset 0 -14px 26px rgba(0,0,0,.18),
+        0 10px 26px rgba(69, 39, 18, .16);
+      position:relative;
+      width:max-content;
+      min-width:100%;
+      margin:0 auto;
+    }
+
+    .board-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      color:#fff9ea;
+      text-shadow:0 1px 2px rgba(0,0,0,.35);
+      font-weight:1000;
+    }
+
+    .board-title span{
+      font-size:.94rem;
+      opacity:.94;
+      font-weight:800;
+      text-align:right;
+    }
+
+    .congklak{
+      display:grid;
+      grid-template-columns: 148px max-content 148px;
+      gap:18px;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .store{
+      width:148px;
+      height:148px;
+      border-radius:999px;
+      background:radial-gradient(circle at 45% 30%, #8a512d, var(--pit) 72%);
+      box-shadow: inset 0 10px 20px rgba(0,0,0,.55), 0 3px 0 rgba(255,255,255,.1);
+      border:4px solid rgba(37,20,9,.78);
+      padding:12px 10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      align-self:center;
+      color:#fff8df;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .store .store-label{
+      width:100%;
+      text-align:center;
+      font-size:.73rem;
+      font-weight:1000;
+      background:rgba(0,0,0,.24);
+      border-radius:999px;
+      padding:5px 6px;
+      margin-bottom:8px;
+      z-index:2;
+    }
+
+    .pit-area{
+      display:grid;
+      grid-template-rows: repeat(2, 1fr);
+      gap:18px;
+      width:max-content;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: repeat(7, 78px);
+      gap:14px;
+      justify-content:center;
+    }
+
+    .pit{
+      width:78px;
+      aspect-ratio:1 / 1;
+      min-height:auto;
+      border-radius:999px;
+      background:radial-gradient(circle at 45% 35%, #8a512d, var(--pit) 70%);
+      box-shadow: inset 0 9px 18px rgba(0,0,0,.55), 0 3px 0 rgba(255,255,255,.13);
+      border:3px solid rgba(37,20,9,.78);
+      padding:8px 6px 7px;
+      color:#fff8df;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      position:relative;
+      overflow:hidden;
+      transition:.25s transform, .25s box-shadow, .25s outline;
+    }
+
+    .pit.active{
+      outline:4px solid rgba(255,248,223,.72);
+      transform:translateY(-3px);
+      box-shadow: inset 0 9px 18px rgba(0,0,0,.55), 0 10px 20px rgba(0,0,0,.22);
+    }
+
+    .pit.changed{
+      outline:4px solid rgba(21,128,61,.82);
+    }
+
+    .pit.divide{
+      outline:4px solid rgba(29,78,216,.8);
+    }
+
+    .pit-label{
+      font-size:.67rem;
+      font-weight:1000;
+      color:#ffe8b5;
+      background:rgba(0,0,0,.24);
+      padding:3px 7px;
+      border-radius:999px;
+      margin-bottom:4px;
+      z-index:3;
+      white-space:nowrap;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .pit-count{
+      font-size:1.02rem;
+      font-weight:1000;
+      z-index:3;
+      margin-bottom:3px;
+      text-align:center;
+    }
+
+    .seed-box{
+      display:flex;
+      align-content:flex-start;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:3px;
+      width:100%;
+      min-height:42px;
+      z-index:2;
+    }
+
+    .seed{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 25%, #fff, var(--seed) 55%, #e6c06e);
+      box-shadow:0 1px 2px rgba(0,0,0,.45);
+      animation:pop .22s ease-out both;
+    }
+
+    .more{
+      font-size:.76rem;
+      font-weight:1000;
+      background:rgba(255,248,223,.17);
+      border:1px solid rgba(255,248,223,.28);
+      padding:3px 6px;
+      border-radius:999px;
+      color:#fff8df;
+    }
+
+    @keyframes pop{
+      from{transform:scale(.4); opacity:.2}
+      to{transform:scale(1); opacity:1}
+    }
+
+    .legend{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      background:#fff4e2;
+      border:1px solid #e2c59d;
+      border-radius:16px;
+      padding:12px;
+      line-height:1.35;
+    }
+
+    .mini-card b{
+      display:block;
+      font-size:.82rem;
+      color:#6f3f1f;
+      margin-bottom:4px;
+    }
+
+    .mini-card span{
+      font-size:1.05rem;
+      font-weight:1000;
+    }
+
+    .explain-card{
+      padding:18px;
+    }
+
+    .step-box{
+      border-radius:18px;
+      padding:14px;
+      background:#f3e3cd;
+      border:1px solid #e4c399;
+      line-height:1.58;
+      min-height:88px;
+    }
+
+    .formula{
+      margin-top:10px;
+      background:#17322f;
+      color:#eafffb;
+      border-radius:16px;
+      padding:13px;
+      font-weight:850;
+      line-height:1.52;
+      overflow:auto;
+    }
+
+    .history{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      max-height:320px;
+      overflow:auto;
+    }
+
+    .history li{
+      background:#fff4e2;
+      border:1px solid #e2c59d;
+      border-radius:14px;
+      padding:10px 12px;
+      line-height:1.45;
+      font-size:.94rem;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:26px;
+      height:26px;
+      border-radius:999px;
+      background:#6f3f1f;
+      color:#fff8df;
+      font-weight:1000;
+      margin-right:6px;
+      font-size:.78rem;
+    }
+
+    .result{
+      border:2px solid rgba(21,128,61,.35) !important;
+      background:#ecfdf3 !important;
+    }
+
+    .warn{
+      color:var(--danger);
+      font-weight:900;
+    }
+
+    .small-note{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:#fff7ed;
+      border:1px dashed #c98b54;
+      color:#5d371d;
+      line-height:1.45;
+      font-size:.9rem;
+    }
+
+    footer{
+      width:min(1180px, calc(100% - 24px));
+      margin:0 auto 28px;
+      color:#75553a;
+      font-size:.9rem;
+      text-align:center;
+      line-height:1.5;
+    }
+
+    @media (max-width: 940px){
+      .app{
+        grid-template-columns:1fr;
+      }
+      .panel{
+        position:relative;
+        top:auto;
+      }
+      .board-wrap{
+        padding:22px 24px;
+      }
+      .congklak{
+        grid-template-columns: 118px max-content 118px;
+        gap:14px;
+      }
+      .store{
+        width:118px;
+        height:118px;
+        border-radius:999px;
+      }
+      .pit-area{
+        gap:14px;
+      }
+      .row{
+        grid-template-columns: repeat(7, 68px);
+        gap:10px;
+      }
+      .pit{
+        width:68px;
+      }
+      .legend{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 520px){
+      .btns{
+        grid-template-columns:1fr;
+      }
+      .quick{
+        grid-template-columns:1fr;
+      }
+      .board-wrap{
+        padding:18px 18px;
+      }
+      .congklak{
+        grid-template-columns: 96px max-content 96px;
+        gap:10px;
+      }
+      .store{
+        width:96px;
+        height:96px;
+      }
+      .pit-area{
+        gap:12px;
+      }
+      .row{
+        grid-template-columns: repeat(7, 58px);
+        gap:8px;
+      }
+      .pit{
+        width:58px;
+      }
+      .pit-label{
+        font-size:.61rem;
+      }
+      .pit-count{
+        font-size:.94rem;
+      }
+      .seed-box{
+        min-height:34px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Papan Congklak Digital FPB & KPK</h1>
+    <p>
+      Visualisasi algoritma Euclid pada masalah FPB dan KPP melalui media congklak berbasis algoritma selisih lumbung (pendekatan etnomamatika).
+Penelitian ini mengembangkan visualisasi algoritma Euclid dalam pembelajaran Faktor Persekutuan Terbesar (FPB) dan Kelipatan Persekutuan Terkecil (KPK) melalui media congklak berbasis algoritma selisih lumbung. Media congklak digunakan sebagai representasi konkret untuk membantu siswa memahami proses pengurangan berulang, pencarian selisih, penyamaan jumlah biji, serta pemanfaatan nilai FPB dalam menentukan KPK. Pendekatan ini memadukan konsep matematika formal dengan konteks budaya lokal melalui etnomatematika, sehingga pembelajaran FPB dan KPK menjadi lebih visual, bermakna, dan mudah dipahami oleh siswa sekolah dasar.
+
+    </p>
+    
+    
+
+  </header>
+
+  <main class="app">
+    <aside class="panel">
+      <h2>Pengaturan Latihan</h2>
+
+      <label for="mode">Pilih Materi</label>
+      <select id="mode">
+        <option value="fpb">FPB - algoritma Euclid berpasangan</option>
+        <option value="kpk">KPK - pakai FPB di lumbung</option>
+      </select>
+
+      <div id="fpbMethodRow">
+        <label for="fpbMethod">Metode FPB</label>
+        <select id="fpbMethod">
+          <option value="selisih">Selisih - pengurangan berulang</option>
+          <option value="modulo">Modulo - langkah cepat</option>
+        </select>
+        <div class="hint">Selisih = konkret &amp; bertahap. Modulo = lebih cepat (sisa bagi).</div>
+      </div>
+
+      <label for="numbers">Bilangan</label>
+      <input id="numbers" value="12, 20" placeholder="Contoh: 12, 20 atau 12, 18, 20" />
+      <div class="hint">Masukkan 2 sampai 4 bilangan bulat positif. Pisahkan dengan koma atau spasi.</div>
+
+      <div class="quick">
+        <button type="button" data-example="12, 20">12 & 20</button>
+        <button type="button" data-example="12, 18, 20">12, 18, 20</button>
+        <button type="button" data-example="10, 16">10 & 16</button>
+      </div>
+
+      <div class="btns">
+        <button id="startBtn" class="primary">Mulai</button>
+        <button id="nextBtn" class="ok" disabled>Langkah</button>
+        <button id="autoBtn" class="ghost" disabled>Otomatis</button>
+        <button id="resetBtn" class="danger">Reset</button>
+        <button id="randomBtn" class="wide">Buat Soal Acak</button>
+      </div>
+
+      <div class="status" id="status">
+        Pilih materi, isi bilangan, lalu tekan <b>Mulai</b>.
+      </div>
+
+      <div class="small-note">
+        <b>Untuk 3 bilangan atau lebih:</b> FPB dan KPK dihitung bertahap berpasangan.
+        Contoh: FPB(12,18,20) = FPB(FPB(12,18),20); KPK(12,18,20) = KPK(KPK(12,18),20).
+      </div>
+    </aside>
+
+    <section class="main">
+      <section class="board-card">
+        <div class="board-wrap">
+          <div class="board-title">
+            <div id="boardTitle">Papan Congklak</div>
+            <span id="boardSubtitle">Lubang A dan B + dua lumbung</span>
+          </div>
+
+          <div class="congklak">
+            <div class="store" id="leftStore">
+              <div class="store-label" id="leftStoreLabel">Lumbung FPB</div>
+              <div class="pit-count" id="leftStoreCount">0</div>
+              <div class="seed-box" id="leftStoreSeeds"></div>
+            </div>
+
+            <div class="pit-area">
+              <div class="row" id="rowA"></div>
+              <div class="row" id="rowB"></div>
+            </div>
+
+            <div class="store" id="rightStore">
+              <div class="store-label" id="rightStoreLabel">Lumbung Hasil</div>
+              <div class="pit-count" id="rightStoreCount">?</div>
+              <div class="seed-box" id="rightStoreSeeds"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="mini-card">
+            <b>Angka aktif</b>
+            <span id="activeNumbers">-</span>
+          </div>
+          <div class="mini-card">
+            <b>Mode</b>
+            <span id="modeLabel">-</span>
+          </div>
+          <div class="mini-card">
+            <b>Jawaban sementara</b>
+            <span id="currentAnswer">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="explain-card">
+        <h2>Penjelasan Langkah</h2>
+        <div class="step-box" id="stepText">
+          Belum ada simulasi. Tekan <b>Mulai</b> untuk melihat langkah konkret di papan congklak.
+        </div>
+        <div class="formula" id="formulaText">
+          KPK dua bilangan: (a ÷ FPB) × (b ÷ FPB) × FPB.
+        </div>
+      </section>
+
+      <section class="explain-card">
+        <h2>Riwayat Langkah</h2>
+        <ul class="history" id="history"></ul>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    
+
+    &copy; 2026 Andika Arisetyawan
+  </footer>
+
+  <script>
+    const state = {
+      mode: "fpb",
+      inputNumbers: [],
+      current: [],
+      original: [],
+      step: 0,
+      finished: false,
+      history: [],
+      storeLeft: 0,
+      storeRight: 0,
+      storeList: [],
+      changedSlots: [],
+      divideSlots: [],
+      autoTimer: null,
+
+      // FPB berpasangan (algoritma Euclid: selisih / modulo)
+      fpbMethod: "selisih",
+      fpbStage: 0,
+      fpbCurrent: 0,
+      fpbA: 0,
+      fpbB: 0,
+      fpbSlots: {},
+
+      // khusus KPK berbasis FPB
+      kpkStage: 0,
+      kpkPhase: 0,
+      kpkPairA: 0,
+      kpkPairB: 0,
+      kpkGcd: 0,
+      kpkQ1: 0,
+      kpkQ2: 0,
+      kpkCurrent: 0,
+      kpkPairResult: 0,
+      kpkSlots: {}
+    };
+
+    const el = {
+      mode: document.getElementById("mode"),
+      fpbMethod: document.getElementById("fpbMethod"),
+      fpbMethodRow: document.getElementById("fpbMethodRow"),
+      numbers: document.getElementById("numbers"),
+      startBtn: document.getElementById("startBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      autoBtn: document.getElementById("autoBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      randomBtn: document.getElementById("randomBtn"),
+      status: document.getElementById("status"),
+      rowA: document.getElementById("rowA"),
+      rowB: document.getElementById("rowB"),
+      leftStoreCount: document.getElementById("leftStoreCount"),
+      rightStoreCount: document.getElementById("rightStoreCount"),
+      leftStoreSeeds: document.getElementById("leftStoreSeeds"),
+      rightStoreSeeds: document.getElementById("rightStoreSeeds"),
+      leftStoreLabel: document.getElementById("leftStoreLabel"),
+      rightStoreLabel: document.getElementById("rightStoreLabel"),
+      activeNumbers: document.getElementById("activeNumbers"),
+      modeLabel: document.getElementById("modeLabel"),
+      currentAnswer: document.getElementById("currentAnswer"),
+      stepText: document.getElementById("stepText"),
+      formulaText: document.getElementById("formulaText"),
+      history: document.getElementById("history"),
+      boardTitle: document.getElementById("boardTitle"),
+      boardSubtitle: document.getElementById("boardSubtitle")
+    };
+
+    const slotOrder = ["A3", "B3", "A4", "B4"];
+    const allA = ["A1","A2","A3","A4","A5","A6","A7"];
+    const allB = ["B1","B2","B3","B4","B5","B6","B7"];
+
+    function parseNumbers(){
+      const raw = el.numbers.value.trim();
+      const nums = raw.split(/[,\s]+/)
+        .map(x => Number(x))
+        .filter(x => Number.isFinite(x));
+
+      const invalid = nums.some(x => !Number.isInteger(x) || x <= 0);
+      if(invalid || nums.length < 2 || nums.length > 4){
+        throw new Error("Masukkan 2 sampai 4 bilangan bulat positif. Contoh: 12, 20 atau 12, 18, 20.");
+      }
+      if(nums.some(x => x > 300)){
+        throw new Error("Untuk visual biji, gunakan angka maksimal 300 agar latihan tetap nyaman.");
+      }
+      return nums;
+    }
+
+    function gcdTwo(a,b){
+      a = Math.abs(a); b = Math.abs(b);
+      while(b !== 0){
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a;
+    }
+
+    function gcdList(nums){
+      return nums.reduce((a,b) => gcdTwo(a,b));
+    }
+
+    function lcmTwo(a,b){
+      return Math.abs(a*b) / gcdTwo(a,b);
+    }
+
+    function lcmList(nums){
+      return nums.reduce((a,b) => lcmTwo(a,b));
+    }
+
+    function makeSeeds(container, count){
+      container.innerHTML = "";
+      const maxDots = 55;
+      const visible = Math.min(Math.max(count,0), maxDots);
+      for(let i=0; i<visible; i++){
+        const s = document.createElement("span");
+        s.className = "seed";
+        s.style.animationDelay = `${Math.min(i, 25) * 8}ms`;
+        container.appendChild(s);
+      }
+      if(count > maxDots){
+        const more = document.createElement("span");
+        more.className = "more";
+        more.textContent = `+${count - maxDots}`;
+        container.appendChild(more);
+      }
+    }
+
+    function slotValueMap(){
+      const map = {};
+      allA.concat(allB).forEach(k => map[k] = {value:0, title:k, active:false, divide:false});
+
+      if(state.mode === "fpb"){
+        Object.keys(state.fpbSlots).forEach(slot => {
+          map[slot] = state.fpbSlots[slot];
+        });
+      }else{
+        Object.keys(state.kpkSlots).forEach(slot => {
+          map[slot] = state.kpkSlots[slot];
+        });
+      }
+
+      return map;
+    }
+
+    function renderPit(slot, data){
+      const pit = document.createElement("div");
+      pit.className = "pit";
+      if(data.active) pit.classList.add("active");
+      if(data.divide) pit.classList.add("divide");
+      if(state.changedSlots.includes(slot)) pit.classList.add("changed");
+
+      const label = document.createElement("div");
+      label.className = "pit-label";
+      label.textContent = data.title || slot;
+
+      const count = document.createElement("div");
+      count.className = "pit-count";
+      count.textContent = data.value || "";
+
+      const seeds = document.createElement("div");
+      seeds.className = "seed-box";
+      makeSeeds(seeds, data.value || 0);
+
+      pit.appendChild(label);
+      pit.appendChild(count);
+      pit.appendChild(seeds);
+      return pit;
+    }
+
+    function renderBoard(){
+      const map = slotValueMap();
+      el.rowA.innerHTML = "";
+      el.rowB.innerHTML = "";
+
+      allA.forEach(slot => el.rowA.appendChild(renderPit(slot, map[slot])));
+      allB.forEach(slot => el.rowB.appendChild(renderPit(slot, map[slot])));
+
+      el.leftStoreCount.textContent = state.storeLeft || 0;
+      el.rightStoreCount.textContent = state.storeRight ? state.storeRight : "?";
+      makeSeeds(el.leftStoreSeeds, state.storeLeft || 0);
+      makeSeeds(el.rightStoreSeeds, state.storeRight || 0);
+
+      let active;
+      if(state.mode === "fpb"){
+        active = state.inputNumbers.length ? [state.fpbA, state.fpbB] : [];
+      }else{
+        active = [state.kpkPairA, state.kpkPairB].filter(Boolean);
+      }
+
+      el.activeNumbers.textContent = active.length ? active.join(", ") : "-";
+      el.modeLabel.textContent = state.mode === "fpb" ? "FPB berpasangan" : "KPK berbasis FPB";
+      el.currentAnswer.textContent = state.storeRight ? state.storeRight : "-";
+
+      if(state.mode === "fpb"){
+        if(state.fpbMethod === "modulo"){
+          el.boardTitle.textContent = "FPB dengan Congklak Modulo";
+          el.boardSubtitle.textContent = "Keluarkan kelipatan penuh, sisakan sisanya";
+          el.leftStoreLabel.textContent = "Lumbung Sisa";
+        }else{
+          el.boardTitle.textContent = "FPB dengan Congklak Selisih";
+          el.boardSubtitle.textContent = "Samakan kedua lubang lewat pengurangan";
+          el.leftStoreLabel.textContent = "Lumbung Selisih";
+        }
+        el.rightStoreLabel.textContent = "Lumbung FPB";
+      }else{
+        el.boardTitle.textContent = "KPK dengan FPB di Lumbung";
+        el.boardSubtitle.textContent = "Bagi tiap lubang dengan FPB, lalu kalikan kembali";
+        el.leftStoreLabel.textContent = "Lumbung FPB";
+        el.rightStoreLabel.textContent = "Lumbung KPK";
+      }
+
+      renderHistory();
+    }
+
+    function renderHistory(){
+      el.history.innerHTML = "";
+      state.history.forEach((item, index) => {
+        const li = document.createElement("li");
+        if(item.result) li.classList.add("result");
+        li.innerHTML = `<span class="badge">${index + 1}</span>${item.text}`;
+        el.history.appendChild(li);
+      });
+      el.history.scrollTop = el.history.scrollHeight;
+    }
+
+    function addHistory(text, result=false){
+      state.history.push({text, result});
+    }
+
+    function setText(step, formula, status){
+      el.stepText.innerHTML = step;
+      el.formulaText.innerHTML = formula;
+      el.status.innerHTML = status || step;
+    }
+
+    function isAllEqual(arr){
+      return arr.length > 0 && arr.every(x => x === arr[0]);
+    }
+
+    function start(){
+      stopAuto();
+      let nums;
+      try{
+        nums = parseNumbers();
+      }catch(err){
+        el.status.innerHTML = `<span class="warn">${err.message}</span>`;
+        return;
+      }
+
+      state.mode = el.mode.value;
+      state.fpbMethod = el.fpbMethod.value;
+      state.inputNumbers = [...nums];
+      state.original = [...nums];
+      state.current = [...nums];
+      state.step = 0;
+      state.finished = false;
+      state.history = [];
+      state.storeLeft = 0;
+      state.storeRight = 0;
+      state.storeList = [];
+      state.changedSlots = [];
+      state.divideSlots = [];
+      state.fpbSlots = {};
+      state.fpbStage = 1;
+      state.fpbCurrent = nums[0];
+      state.fpbA = nums[0];
+      state.fpbB = nums[1];
+      state.kpkSlots = {};
+      state.kpkStage = 1;
+      state.kpkPhase = 0;
+      state.kpkCurrent = nums[0];
+      state.kpkPairA = nums[0];
+      state.kpkPairB = nums[1];
+      state.kpkGcd = 0;
+      state.kpkQ1 = 0;
+      state.kpkQ2 = 0;
+      state.kpkPairResult = 0;
+
+      el.nextBtn.disabled = false;
+      el.autoBtn.disabled = false;
+      el.autoBtn.textContent = "Otomatis";
+
+      if(state.mode === "fpb"){
+        setupFpbPair(true);
+        const methodLabel = state.fpbMethod === "modulo" ? "modulo (langkah cepat)" : "selisih (pengurangan)";
+        const methodRule = state.fpbMethod === "modulo"
+          ? `Modulo: ganti lubang besar dengan <b>sisa bagi</b> (besar mod kecil) sampai sisanya 0.`
+          : `Selisih: ulangi <b>kurangi lubang besar dengan lubang kecil</b> sampai kedua lubang sama.`;
+        addHistory(`Mulai FPB berpasangan untuk bilangan: <b>${nums.join(", ")}</b>. Metode: <b>${methodLabel}</b>.`);
+        setText(
+          `Letakkan <b>${state.fpbA}</b> di Lubang A dan <b>${state.fpbB}</b> di Lubang B. Cari FPB pasangan ini dulu` +
+            (nums.length > 2 ? `, lalu hasilnya dipasangkan dengan bilangan berikutnya.` : `.`),
+          methodRule,
+          `Simulasi FPB siap. Tekan <b>Langkah</b>.`
+        );
+      }else{
+        setupKpkPair();
+        addHistory(`Mulai KPK berbasis FPB untuk bilangan: <b>${nums.join(", ")}</b>.`);
+        setText(
+          `Letakkan <b>${state.kpkPairA}</b> di lubang A3 dan <b>${state.kpkPairB}</b> di lubang B3. Berikutnya, cari FPB pasangan ini dan simpan di lumbung FPB.`,
+          `Rumus KPK dua bilangan: <b>(a ÷ FPB) × (b ÷ FPB) × FPB</b>.`,
+          `Simulasi KPK siap. Tekan <b>Langkah</b>.`
+        );
+      }
+
+      renderBoard();
+    }
+
+    function setupKpkPair(){
+      state.kpkPairA = state.kpkCurrent;
+      state.kpkPairB = state.inputNumbers[state.kpkStage];
+      state.kpkGcd = gcdTwo(state.kpkPairA, state.kpkPairB);
+      state.kpkQ1 = state.kpkPairA / state.kpkGcd;
+      state.kpkQ2 = state.kpkPairB / state.kpkGcd;
+      state.kpkPairResult = state.kpkQ1 * state.kpkQ2 * state.kpkGcd;
+      state.kpkPhase = 0;
+      state.storeLeft = 0;
+      state.storeRight = 0;
+      state.changedSlots = [];
+      state.divideSlots = [];
+      state.kpkSlots = {
+        "A3": {value:state.kpkPairA, title:`A3: ${state.kpkPairA}`, active:true, divide:false},
+        "B3": {value:state.kpkPairB, title:`B3: ${state.kpkPairB}`, active:true, divide:false}
+      };
+    }
+
+    function nextStep(){
+      if(state.finished) return;
+      state.changedSlots = [];
+      state.divideSlots = [];
+
+      if(state.mode === "fpb"){
+        fpbStep();
+      }else{
+        kpkStep();
+      }
+
+      renderBoard();
+    }
+
+    function setupFpbPair(){
+      state.fpbA = state.fpbCurrent;
+      state.fpbB = state.inputNumbers[state.fpbStage];
+      state.storeLeft = 0;
+      state.changedSlots = ["A3","B3"];
+      updateFpbSlots();
+    }
+
+    function updateFpbSlots(){
+      state.fpbSlots = {
+        "A3": {value:state.fpbA, title:"Lubang A", active:true, divide:false},
+        "B3": {value:state.fpbB, title:"Lubang B", active:true, divide:false}
+      };
+    }
+
+    function fpbPairDone(){
+      if(state.fpbMethod === "modulo") return state.fpbA === 0 || state.fpbB === 0;
+      return state.fpbA === state.fpbB;
+    }
+
+    function fpbPairValue(){
+      return state.fpbMethod === "modulo"
+        ? Math.max(state.fpbA, state.fpbB)
+        : state.fpbA;
+    }
+
+    function fpbStep(){
+      if(!fpbPairDone()){
+        state.step++;
+        if(state.fpbMethod === "modulo") fpbModuloStep();
+        else fpbSelisihStep();
+        return;
+      }
+      state.step++;
+      fpbAdvanceOrFinish();
+    }
+
+    function fpbSelisihStep(){
+      const a = state.fpbA, b = state.fpbB;
+      const big = Math.max(a,b), small = Math.min(a,b);
+      const diff = big - small;
+      let changed;
+      if(a > b){ state.fpbA = diff; changed = "A3"; }
+      else { state.fpbB = diff; changed = "B3"; }
+      state.storeLeft = diff;
+      state.changedSlots = [changed];
+      updateFpbSlots();
+
+      const eqNote = (state.fpbA === state.fpbB) ? ` Kedua lubang sekarang sama: <b>${state.fpbA}</b>.` : ``;
+      addHistory(
+        `Lubang besar <b>${big}</b> dikurangi <b>${small}</b>. Selisih <b>${diff}</b> ke lumbung. Sekarang A=${state.fpbA}, B=${state.fpbB}.${eqNote}`
+      );
+      setText(
+        `Lubang dengan biji lebih banyak (<b>${big}</b>) diambil sebanyak <b>${small}</b> agar mendekati lubang kecil. Sisa selisih <b>${diff}</b> masuk lumbung.`,
+        `FPB(${big}, ${small}) = FPB(${small}, ${diff}).`,
+        `Langkah ${state.step}: selisih ${diff}. Lanjut dengan ${state.fpbA} dan ${state.fpbB}.`
+      );
+    }
+
+    function fpbModuloStep(){
+      const a = state.fpbA, b = state.fpbB;
+      const big = Math.max(a,b), small = Math.min(a,b);
+      const q = Math.floor(big / small);
+      const r = big % small;
+      let changed;
+      if(a >= b){ state.fpbA = r; changed = "A3"; }
+      else { state.fpbB = r; changed = "B3"; }
+      state.storeLeft = r;
+      state.changedSlots = [changed];
+      updateFpbSlots();
+
+      if(r === 0){
+        addHistory(
+          `<b>${big}</b> = ${small} × ${q}, sisa <b>0</b>. Berarti ${small} membagi habis ${big}, jadi FPB pasangan = <b>${small}</b>.`
+        );
+        setText(
+          `Lubang besar (<b>${big}</b>) habis dibagi <b>${small}</b> (sisa 0). FPB pasangan ini adalah <b>${small}</b>.`,
+          `${big} mod ${small} = 0 → FPB(${big}, ${small}) = ${small}.`,
+          `Langkah ${state.step}: sisa 0. FPB pasangan = ${small}.`
+        );
+      }else{
+        addHistory(
+          `<b>${big}</b> = ${small} × ${q} + ${r}. Sisa <b>${r}</b> ke lumbung. Sekarang A=${state.fpbA}, B=${state.fpbB}.`
+        );
+        setText(
+          `Dari lubang besar (<b>${big}</b>) keluarkan <b>${q}</b> kelompok berisi ${small} biji sekaligus. Sisanya <b>${r}</b> masuk lumbung.`,
+          `${big} mod ${small} = ${r} → FPB(${big}, ${small}) = FPB(${small}, ${r}).`,
+          `Langkah ${state.step}: sisa ${r}. Lanjut dengan ${state.fpbA} dan ${state.fpbB}.`
+        );
+      }
+    }
+
+    function fpbAdvanceOrFinish(){
+      const pairFpb = fpbPairValue();
+      state.fpbCurrent = pairFpb;
+      state.storeRight = pairFpb;
+
+      if(state.fpbStage >= state.inputNumbers.length - 1){
+        state.finished = true;
+        state.fpbA = pairFpb;
+        state.fpbB = pairFpb;
+        state.storeLeft = pairFpb;
+        state.changedSlots = ["A3","B3"];
+        updateFpbSlots();
+        addHistory(
+          `FPB pasangan terakhir adalah <b>${pairFpb}</b>. Jadi <b>FPB(${state.inputNumbers.join(", ")}) = ${pairFpb}</b>.`,
+          true
+        );
+        setText(
+          `Proses selesai. Nilai FPB pasangan terakhir menjadi FPB semua bilangan.`,
+          `FPB(${state.inputNumbers.join(", ")}) = <b>${pairFpb}</b>.`,
+          `Selesai. FPB dari ${state.inputNumbers.join(", ")} adalah <b>${pairFpb}</b>.`
+        );
+        finishButtons();
+        return;
+      }
+
+      const old = pairFpb;
+      state.fpbStage++;
+      setupFpbPair();
+      state.storeRight = old;
+      state.changedSlots = ["A3","B3"];
+
+      const done = state.inputNumbers.slice(0, state.fpbStage).join(", ");
+      addHistory(
+        `FPB sementara <b>${old}</b> dipasangkan dengan bilangan berikutnya <b>${state.fpbB}</b>.`
+      );
+      setText(
+        `FPB pasangan tadi <b>${old}</b>. Sekarang nilai itu dipasangkan dengan bilangan berikutnya <b>${state.fpbB}</b> untuk dicari FPB lagi.`,
+        `FPB(${done}) = FPB(${old}, ${state.fpbB}).`,
+        `Langkah ${state.step}: lanjut ke pasangan (${old}, ${state.fpbB}).`
+      );
+    }
+
+    function kpkStep(){
+      state.step++;
+
+      if(state.kpkPhase === 0){
+        state.storeLeft = state.kpkGcd;
+        state.storeRight = 0;
+        state.changedSlots = ["A3","B3"];
+        state.kpkSlots["A3"] = {value:state.kpkPairA, title:`A3: ${state.kpkPairA}`, active:true, divide:false};
+        state.kpkSlots["B3"] = {value:state.kpkPairB, title:`B3: ${state.kpkPairB}`, active:true, divide:false};
+
+        addHistory(
+          `Tahap ${state.kpkStage}: cari FPB dari <b>${state.kpkPairA}</b> dan <b>${state.kpkPairB}</b>. FPB masuk lumbung: <b>${state.kpkGcd}</b>.`
+        );
+
+        setText(
+          `FPB pasangan <b>${state.kpkPairA}</b> dan <b>${state.kpkPairB}</b> adalah <b>${state.kpkGcd}</b>. Nilai ini disimpan di lumbung FPB.`,
+          `FPB(${state.kpkPairA}, ${state.kpkPairB}) = <b>${state.kpkGcd}</b>.`,
+          `Langkah ${state.step}: FPB pasangan masuk ke lumbung.`
+        );
+
+        state.kpkPhase = 1;
+        return;
+      }
+
+      if(state.kpkPhase === 1){
+        state.kpkSlots["A3"] = {value:state.kpkPairA, title:`A3: ${state.kpkPairA}`, active:true, divide:false};
+        state.kpkSlots["B3"] = {value:state.kpkPairB, title:`B3: ${state.kpkPairB}`, active:true, divide:false};
+        state.kpkSlots["A4"] = {value:state.kpkQ1, title:`A4: ${state.kpkPairA}÷${state.kpkGcd}`, active:true, divide:true};
+        state.kpkSlots["B4"] = {value:state.kpkQ2, title:`B4: ${state.kpkPairB}÷${state.kpkGcd}`, active:true, divide:true};
+        state.changedSlots = ["A4","B4"];
+
+        addHistory(
+          `Bagi masing-masing lubang dengan FPB: <b>${state.kpkPairA} ÷ ${state.kpkGcd} = ${state.kpkQ1}</b> dan <b>${state.kpkPairB} ÷ ${state.kpkGcd} = ${state.kpkQ2}</b>.`
+        );
+
+        setText(
+          `Karena FPB di lumbung adalah <b>${state.kpkGcd}</b>, maka setiap lubang dibagi dengan FPB. Hasil bagi diletakkan di lubang A4 dan B4.`,
+          `Hasil bagi: <b>${state.kpkPairA} ÷ ${state.kpkGcd} = ${state.kpkQ1}</b>, <b>${state.kpkPairB} ÷ ${state.kpkGcd} = ${state.kpkQ2}</b>.`,
+          `Langkah ${state.step}: masing-masing nilai dibagi FPB.`
+        );
+
+        state.kpkPhase = 2;
+        return;
+      }
+
+      if(state.kpkPhase === 2){
+        state.storeRight = state.kpkPairResult;
+        state.kpkSlots["A5"] = {value:state.kpkQ1 * state.kpkQ2, title:`A5: ${state.kpkQ1}×${state.kpkQ2}`, active:true, divide:false};
+        state.changedSlots = ["A5"];
+
+        addHistory(
+          `Kalikan hasil bagi dan FPB: <b>${state.kpkQ1} × ${state.kpkQ2} × ${state.kpkGcd} = ${state.kpkPairResult}</b>. Jadi KPK pasangan ini adalah <b>${state.kpkPairResult}</b>.`
+        );
+
+        setText(
+          `Sekarang hasil bagi dikalikan, lalu dikalikan kembali dengan FPB di lumbung. Hasilnya masuk ke lumbung KPK.`,
+          `KPK(${state.kpkPairA}, ${state.kpkPairB}) = <b>(${state.kpkPairA} ÷ ${state.kpkGcd}) × (${state.kpkPairB} ÷ ${state.kpkGcd}) × ${state.kpkGcd} = ${state.kpkPairResult}</b>.`,
+          `Langkah ${state.step}: hasil KPK pasangan adalah <b>${state.kpkPairResult}</b>.`
+        );
+
+        state.kpkPhase = 3;
+        return;
+      }
+
+      if(state.kpkPhase === 3){
+        state.kpkCurrent = state.kpkPairResult;
+
+        if(state.kpkStage >= state.inputNumbers.length - 1){
+          state.finished = true;
+          state.storeRight = state.kpkCurrent;
+          addHistory(`Tidak ada bilangan berikutnya. Jadi <b>KPK(${state.inputNumbers.join(", ")}) = ${state.kpkCurrent}</b>.`, true);
+          setText(
+            `Semua pasangan sudah diproses. Lumbung KPK berisi hasil akhir: <b>${state.kpkCurrent}</b>.`,
+            `KPK(${state.inputNumbers.join(", ")}) = <b>${state.kpkCurrent}</b>.`,
+            `Selesai. KPK dari ${state.inputNumbers.join(", ")} adalah <b>${state.kpkCurrent}</b>.`
+          );
+          finishButtons();
+          return;
+        }
+
+        const old = state.kpkCurrent;
+        state.kpkStage++;
+        setupKpkPair();
+        state.kpkSlots["A3"] = {value:state.kpkPairA, title:`A3: hasil ${state.kpkPairA}`, active:true, divide:false};
+        state.kpkSlots["B3"] = {value:state.kpkPairB, title:`B3: ${state.kpkPairB}`, active:true, divide:false};
+        state.changedSlots = ["A3","B3"];
+
+        addHistory(
+          `Lanjut bertahap: hasil sementara <b>${old}</b> dipasangkan dengan bilangan berikutnya <b>${state.kpkPairB}</b>.`
+        );
+
+        setText(
+          `Untuk 3 bilangan atau lebih, KPK tidak memakai FPB semua bilangan sekaligus. Prosesnya bertahap: hasil KPK sementara dipasangkan dengan bilangan berikutnya.`,
+          `Tahap berikutnya: <b>KPK(${state.kpkPairA}, ${state.kpkPairB})</b>.`,
+          `Langkah ${state.step}: lanjut ke pasangan berikutnya.`
+        );
+
+        return;
+      }
+    }
+
+    function finishButtons(){
+      el.nextBtn.disabled = true;
+      el.autoBtn.disabled = true;
+      stopAuto();
+    }
+
+    function reset(){
+      stopAuto();
+      state.inputNumbers = [];
+      state.current = [];
+      state.original = [];
+      state.history = [];
+      state.step = 0;
+      state.finished = false;
+      state.storeLeft = 0;
+      state.storeRight = 0;
+      state.storeList = [];
+      state.changedSlots = [];
+      state.divideSlots = [];
+      state.fpbSlots = {};
+      state.fpbStage = 0;
+      state.fpbCurrent = 0;
+      state.fpbA = 0;
+      state.fpbB = 0;
+      state.kpkSlots = {};
+
+      el.nextBtn.disabled = true;
+      el.autoBtn.disabled = true;
+      el.autoBtn.textContent = "Otomatis";
+      el.status.innerHTML = `Pilih materi, isi bilangan, lalu tekan <b>Mulai</b>.`;
+      el.stepText.innerHTML = `Belum ada simulasi. Tekan <b>Mulai</b> untuk melihat langkah konkret di papan congklak.`;
+      el.formulaText.innerHTML = `KPK dua bilangan: <b>(a ÷ FPB) × (b ÷ FPB) × FPB</b>.`;
+      renderBoard();
+    }
+
+    function auto(){
+      if(state.autoTimer){
+        stopAuto();
+        return;
+      }
+      el.autoBtn.textContent = "Berhenti";
+      state.autoTimer = setInterval(() => {
+        if(state.finished){
+          stopAuto();
+          return;
+        }
+        nextStep();
+      }, 1050);
+    }
+
+    function stopAuto(){
+      if(state.autoTimer){
+        clearInterval(state.autoTimer);
+        state.autoTimer = null;
+      }
+      if(el.autoBtn) el.autoBtn.textContent = "Otomatis";
+    }
+
+    function randomProblem(){
+      stopAuto();
+      const count = Math.random() > .55 ? 3 : 2;
+      const pool = [6,8,9,10,12,14,15,16,18,20,21,24,25,27,28,30,32,36];
+      const nums = [];
+      while(nums.length < count){
+        const n = pool[Math.floor(Math.random() * pool.length)];
+        if(!nums.includes(n)) nums.push(n);
+      }
+      el.numbers.value = nums.join(", ");
+      start();
+    }
+
+    document.querySelectorAll("[data-example]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        el.numbers.value = btn.dataset.example;
+        start();
+      });
+    });
+
+    el.startBtn.addEventListener("click", start);
+    el.nextBtn.addEventListener("click", nextStep);
+    el.autoBtn.addEventListener("click", auto);
+    el.resetBtn.addEventListener("click", reset);
+    el.randomBtn.addEventListener("click", randomProblem);
+    el.fpbMethod.addEventListener("change", () => {
+      if(state.inputNumbers.length) start();
+    });
+    el.mode.addEventListener("change", () => {
+      toggleFpbMethodRow();
+      if(state.inputNumbers.length) start();
+    });
+
+    function toggleFpbMethodRow(){
+      el.fpbMethodRow.style.display = (el.mode.value === "fpb") ? "" : "none";
+    }
+
+    toggleFpbMethodRow();
+    reset();
+  </script>
+</body>
+</html>
