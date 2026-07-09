@@ -1,4 +1,4 @@
-const CACHE_NAME = 'congklak-fpb-kpk-v1';
+const CACHE_NAME = 'congklak-fpb-kpk-v2';
 const BASE_PATH = '/congklak-fpb-kpk/';
 
 const APP_SHELL = [
@@ -6,8 +6,8 @@ const APP_SHELL = [
   BASE_PATH + 'index.html',
   BASE_PATH + 'manifest.webmanifest',
   BASE_PATH + 'offline.html',
-  BASE_PATH + 'icons/icon-192.png',
-  BASE_PATH + 'icons/icon-512.png'
+  BASE_PATH + 'icon-192.png',
+  BASE_PATH + 'icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -21,7 +21,11 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
     ).then(() => self.clients.claim())
   );
 });
@@ -36,7 +40,9 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request)
         .then((networkResponse) => {
           const cloned = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, cloned);
+          });
           return networkResponse;
         })
         .catch(() => {
