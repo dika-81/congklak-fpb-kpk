@@ -1,0 +1,43 @@
+{
+  "name": "Congklak FPB KPK",
+  "short_name": "Congklak FPB KPK",
+  "description": "Media pembelajaran interaktif untuk memahami FPB dan KPK melalui visualisasi papan congklak digital.",
+  "lang": "id-ID",
+  "start_url": "/congklak-fpb-kpk/",
+  "scope": "/congklak-fpb-kpk/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fff8ee",
+  "theme_color": "#8b5a2b",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Latihan FPB",
+      "short_name": "FPB",
+      "description": "Buka latihan FPB",
+      "url": "/congklak-fpb-kpk/?materi=fpb",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Latihan KPK",
+      "short_name": "KPK",
+      "description": "Buka latihan KPK",
+      "url": "/congklak-fpb-kpk/?materi=kpk",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
