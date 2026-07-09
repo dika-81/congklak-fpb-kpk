@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f766e">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Papan Congklak Digital FPB & KPK</title>
@@ -546,6 +549,7 @@
     }
   </style>
 </head>
+ 
 <body>
   <header>
     <h1>Papan Congklak Digital FPB & KPK</h1>
@@ -1345,5 +1349,12 @@ Penelitian ini mengembangkan visualisasi algoritma Euclid dalam pembelajaran Fak
     toggleFpbMethodRow();
     reset();
   </script>
+   <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}
+</script>
 </body>
 </html>
