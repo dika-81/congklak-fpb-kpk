@@ -1,4 +1,4 @@
-const CACHE_NAME = 'congklak-fpb-kpk-v2';
+const CACHE_NAME = 'congklak-fpb-kpk-v3';
 const BASE_PATH = '/congklak-fpb-kpk/';
 
 const APP_SHELL = [
